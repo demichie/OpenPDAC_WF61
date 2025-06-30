@@ -1,0 +1,35 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+STARTTIME_POST=$(date +%s)
+
+export PATH="/users/pardinif/OpenPDACconda/bin:$PATH"
+
+STARTTIME_PLOTBALLISTICS=$(date +%s)
+
+rm -rf /postProcessing/raster_maps/ballistics
+
+python plotBallistics.py > log.ballistic
+
+ENDTIME_PLOTBALLISTICS=$(date +%s)
+
+echo "plotBallistics (serial): $(($ENDTIME_PLOTBALLISTICS - $STARTTIME_PLOTBALLISTICS)) seconds" > log.postProcessingTime1
+
+STARTTIME_CREATEMAPS=$(date +%s)
+
+rm -rf /postProcessing/raster_maps/flow
+
+python createMaps.py -np 64 > log.createMaps
+
+ENDTIME_CREATEMAPS=$(date +%s)
+
+echo "createMaps (parallel): $(($ENDTIME_CREATEMAPS - $STARTTIME_CREATEMAPS)) seconds" >> log.postProcessingTime1
+
+ENDTIME_POST=$(date +%s)
+
+echo " "
+echo "It takes $(($ENDTIME_POST - $STARTTIME_POST)) seconds to complete Allrun.post-1" >> log.postProcessingTime1
+#------------------------------------------------------------------------------

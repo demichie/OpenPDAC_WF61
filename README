@@ -1,0 +1,26 @@
+From the user home (/users/USERNAME):
+
+mkdir OpenPDACconda
+module load LUMI
+module load lumi-container-wrapper
+conda-containerize new --prefix OpenPDACconda environment.yml
+
+To use the Anaconda environment:
+
+export PATH="/users/USERNAME/OpenPDACconda/bin:$PATH"
+
+This path has to be changed also in the files Allrun.pre-1 and Allrun.post-1 
+
+Copy the .sif file in a folder and edit its path in Allrun.post-2
+
+To execute a OpenPDAC simulation:
+
+1) sbatch ncores-pre-1.sh to execute blockMesh and decomposePar (all serial)
+
+2) sbatch ncores-pre-2.sh to execute topoSet topoGrid and atmospheric initialisation (all parallel)
+
+3) sbatch ncores-run.sh to execute the run (parallel)
+
+4) sbatch ncores-post-1.sh to execute plotBallistics.py (serial) and createMaps.py (parallel)
+
+5) sbatch ncores-post-2.sh to execute plotIso.py (parallel) 

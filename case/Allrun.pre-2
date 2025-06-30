@@ -1,0 +1,81 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+argCollated=''
+# Parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -c | -collated)
+	echo "pre-processing with collated I/O"
+        argCollated='-fileHandler collated'
+        # argCollated='-fileHandler collated -opt-switch maxThreadFileBufferSize=2E9'
+        shift 1
+        ;;
+     *)
+        usage "unknown option/argument: '$*'"
+        ;;
+    esac
+done
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+                    STARTTIME_CHECK1=$(date +%s)
+$mpiRUN checkMesh -allGeometry -allTopology -parallel $argCollated > log.checkMesh-1
+                    ENDTIME_CHECK1=$(date +%s)
+echo "checkMesh (parallel): $(($ENDTIME_CHECK1 - $STARTTIME_CHECK1)) seconds" >> log.preProcessingTime
+
+# set the crater cells
+		   STARTTIME_TOPO=$(date +%s)
+$mpiRUN topoSet -parallel $argCollated > log.topoSet
+		   ENDTIME_TOPO=$(date +%s)
+echo "topoSet (parallel): $(($ENDTIME_TOPO - $STARTTIME_TOPO)) seconds" >> log.preProcessingTime
+
+STARTTIME_PRE=$(date +%s)
+
+		   STARTTIME_TOPOGRID=$(date +%s)
+# runApplication topoGrid
+$mpiRUN topoGrid -parallel $argCollated > log.topoGrid
+# processorDir=$(find . -name processors*)
+# cp -r $processorDir/0/polyMesh $processorDir/constant/
+# rm -rf $processorDir/0/polyMesh
+		   ENDTIME_TOPOGRID=$(date +%s)
+echo "topoGrid (parallel): $(($ENDTIME_TOPOGRID - $STARTTIME_TOPOGRID)) seconds" >> log.preProcessingTime
+
+
+                    STARTTIME_CHECK1=$(date +%s)
+$mpiRUN checkMesh -allGeometry -allTopology -parallel $argCollated > log.checkMesh-2
+                    ENDTIME_CHECK1=$(date +%s)
+echo "checkMesh (parallel): $(($ENDTIME_CHECK1 - $STARTTIME_CHECK1)) seconds" >> log.preProcessingTime
+
+
+# set fvSolution and cloudProperties for initialization of atm. profile and ballistics
+cp ./system/controlDict.init ./system/controlDict
+cp ./system/fvSolution.init ./system/fvSolution
+cp ./constant/cloudProperties.init ./constant/cloudProperties
+
+
+# (first run for initialization of the solution: fileds and ballistics)
+		   STARTTIME_ATMINIT=$(date +%s)
+$mpiRUN foamRun -parallel $argCollated > log.foamRun-init
+		   ENDTIME_ATMINIT=$(date +%s)
+echo "atmospheric initialisation: $(($ENDTIME_ATMINIT - $STARTTIME_ATMINIT)) seconds" >> log.preProcessingTime
+
+# set different values in the crater/conduit zone
+		   STARTTIME_SETFIELDS=$(date +%s)
+$mpiRUN setFields -parallel $argCollated > log.setFields
+		   ENDTIME_SETFIELDS=$(date +%s)
+echo "setFields: $(($ENDTIME_SETFIELDS - $STARTTIME_SETFIELDS)) seconds" >> log.preProcessingTime
+
+
+
+
+ENDTIME_PRE=$(date +%s)
+
+echo " "
+echo "It takes $(($ENDTIME_PRE - $STARTTIME_PRE)) seconds to complete Allrun.pre-2" >> log.preProcessingTime
+#------------------------------------------------------------------------------

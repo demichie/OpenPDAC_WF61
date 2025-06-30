@@ -1,0 +1,25 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+STARTTIME_POST=$(date +%s)
+
+STARTTIME_PLOTISO=$(date +%s)
+
+rm -rf /postProcessing/frames_png
+
+#python plotIso.py  --np 32 --fr 5 > log.plotIso
+
+singularity run -B $(pwd):/work --env PYVISTA_OFF_SCREEN="true" --env DISPLAY=""  /scratch/project_465001878/postprocessingTools/pyvista_lumi_custom_container.sif /work/plotIso.py  --np 32 --fr 5 > log.plotIso
+
+ENDTIME_PLOTISO=$(date +%s)
+
+echo "plotIso (parallel): $(($ENDTIME_PLOTISO - $STARTTIME_PLOTISO)) seconds" > log.postProcessingTime2
+
+ENDTIME_POST=$(date +%s)
+
+echo " "
+echo "It takes $(($ENDTIME_POST - $STARTTIME_POST)) seconds to complete Allrun.post-2" >> log.postProcessingTime2
+#------------------------------------------------------------------------------

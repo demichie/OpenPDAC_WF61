@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ "$machineNAME" == "vesuvio" ]; then
+    echo "Using VESUVIO  machine settings"      
+    #  export PYTHON_ENV_PATH="/home/brogi/miniconda3"
+    #  export OPENPDAC_BASHRC="/home/brogi/gitRepositories/OpenFOAM/myProjects/myopenpdac-11/etc/bashrc"
+    export mpiRUN='mpirun'
+    # export pythonCMD='python'
+    module purge
+    module load openFOAM-12
+    source $FOAM_BASHRC
+
+elif [ "$machineNAME" == "lumi" ]; then
+    echo "Using LUMI  machine settings"
+    # export PYTHON_ENV_PATH="/project/project_465001219/pythonEnvs/OpenPDAC/bin/activate"
+    # export OPENPDAC_BASHRC="/project/project_465001219/gitRepositories/myopenpdac-11/etc/bashrc"
+    export mpiRUN='srun'
+    export pythonCMD='python3'
+    module use /appl/local/csc/modulefiles
+    module load openfoam/12
+else
+        error "Unknow machine name, possible options: vesuvio, lumi"
+fi
+
