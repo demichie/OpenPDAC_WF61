@@ -29,21 +29,21 @@ Follow these steps to build the container image.
 
     **For Singularity:**
     ```bash
-    sudo singularity build pyvista_cpu.sif pyvista_lumi_custom_EN.def
+    sudo singularity build pyvista_lumi_custom_container.sif pyvista_lumi_custom_EN.def
     ```
 
     **For Apptainer:**
     ```bash
-    sudo apptainer build pyvista_cpu.sif pyvista_lumi_custom_EN.def
+    sudo apptainer build pyvista_lumi_custom_container.sif pyvista_lumi_custom_EN.def
     ```
 
-> **Note:** You can replace `pyvista_cpu.sif` with any name you prefer for the final container file.
+> **Note:** You can replace `pyvista_lumi_custom_container.sif` with any name you prefer for the final container file.
 
 ## After the Build
 
 The build process may take several minutes as it downloads the base OS, installs system packages, sets up Conda, and resolves the Python environment.
 
-Once it completes successfully, a new file named `pyvista_cpu.sif` (or the name you chose) will appear in this directory. This `.sif` file is your self-contained, reproducible, and portable scientific environment.
+Once it completes successfully, a new file named `pyvista_lumi_custom_container.sif` (or the name you chose) will appear in this directory. This `.sif` file is your self-contained, reproducible, and portable scientific environment.
 
 ---
 
@@ -58,6 +58,6 @@ If you are on a system where you do not have `sudo` privileges (e.g., an HPC log
 
 2.  **Run the build command with the `--remote` flag**:
     ```bash
-    singularity build --remote pyvista_cpu.sif pyvista_lumi_custom_EN.def
+    singularity build --remote pyvista_lumi_custom_container.sif pyvista_lumi_custom_EN.def
     ```
 This will upload your definition file, build it on Sylabs' servers, and download the finished `.sif` image to your current directory.
